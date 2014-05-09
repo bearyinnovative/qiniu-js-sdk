@@ -360,6 +360,12 @@ function QiniuJsSDK() {
                     }
                 }
 
+                if (uploader.runtime === 'html4' && that.detectIEVersion()) {
+                    // plupload.extend(multipart_params_obj, multipart_params_obj, {
+                    //     accept: 'text/plain; charset=utf-8'
+                    // })
+                    multipart_params_obj['accept'] = 'text/plain; charset=utf-8';
+                }
 
                 up.setOption({
                     'url': 'http://up.qiniu.com/',
