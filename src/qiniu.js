@@ -287,7 +287,9 @@ function QiniuJsSDK() {
                         that.token = res.uptoken;
                     }
                     // always resolve promise;
-                    resolve();
+                    if (ajax.readyState === 4) {
+                      resolve();
+                    }
                 };
                 ajax.send();
             } else {
@@ -295,6 +297,7 @@ function QiniuJsSDK() {
                 resolve();
             }
           });
+          return promise;
         };
 
         var getFileKey = function(up, file, func) {
