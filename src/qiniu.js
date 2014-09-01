@@ -276,6 +276,7 @@ function QiniuJsSDK() {
         reset_chunk_size();
 
         var getUpToken = function() {
+          var promise = new Promise(function(resolve, reject){
             if (!op.uptoken) {
                 var ajax = that.createAjax();
                 ajax.open('GET', that.uptoken_url, true);
@@ -285,11 +286,15 @@ function QiniuJsSDK() {
                         var res = that.parseJSON(ajax.responseText);
                         that.token = res.uptoken;
                     }
+                    // always resolve promise;
+                    resolve();
                 };
                 ajax.send();
             } else {
                 that.token = op.uptoken;
+                resolve();
             }
+          });
         };
 
         var getFileKey = function(up, file, func) {
@@ -324,19 +329,19 @@ function QiniuJsSDK() {
         uploader.init();
 
         uploader.bind('FilesAdded', function(up, files) {
-            var auto_start = up.getOption && up.getOption('auto_start');
-            auto_start = auto_start || (up.settings && up.settings.auto_start);
-            if (auto_start) {
+            getUpToken().then(function(){
+              var auto_start = up.getOption && up.getOption('auto_start');
+              auto_start = auto_start || (up.settings && up.settings.auto_start);
+              if (auto_start) {
                 $.each(files, function(i, file) {
-                    up.start();
+                  up.start();
                 });
-            }
-            up.refresh(); // Reposition Flash/Silverlight
+              }
+              up.refresh(); // Reposition Flash/Silverlight
+            });
         });
 
         uploader.bind('BeforeUpload', function(up, file) {
-            getUpToken();
-
             ctx = '';
 
             var directUpload = function(up, file, func) {
