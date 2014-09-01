@@ -242,7 +242,9 @@ function QiniuJsSDK() {
         op.init.FileUploaded = function() {};
 
         that.uptoken_url = op.uptoken_url;
-        that.token = '';
+        if (that.token === null || typeof that.token === 'undefined') {
+          that.token = '';
+        }
         that.key_handler = typeof op.init.Key === 'function' ? op.init.Key : '';
         this.domain = op.domain;
         var ctx = '';
