@@ -247,9 +247,10 @@ function QiniuJsSDK() {
         }
 
         // for https
-        this.uploadDomain = 'http://up.qiniu.com/';
+        var thz = this;
+        thz.uploadDomain = 'http://up.qiniu.com/';
         if (op.use_https) {
-          this.uploadDomain = 'https://up.qbox.me/';
+          thz.uploadDomain = 'https://up.qbox.me/';
         }
 
         that.key_handler = typeof op.init.Key === 'function' ? op.init.Key : '';
@@ -385,7 +386,7 @@ function QiniuJsSDK() {
 
 
                 up.setOption({
-                    'url': this.uploadDomain,
+                    'url': thz.uploadDomain,
                     'multipart': true,
                     'chunk_size': undefined,
                     'multipart_params': multipart_params_obj
@@ -411,7 +412,7 @@ function QiniuJsSDK() {
                         }
                     }
                     up.setOption({
-                        'url': this.uploadDomain + 'mkblk/' + blockSize,
+                        'url': thz.uploadDomain + 'mkblk/' + blockSize,
                         'multipart': false,
                         'chunk_size': chunk_size,
                         'required_features': "chunks",
@@ -435,7 +436,7 @@ function QiniuJsSDK() {
             chunk_size = chunk_size || (up.settings && up.settings.chunk_size);
             if (leftSize < chunk_size) {
                 up.setOption({
-                    'url': this.uploadDomain + 'mkblk/' + leftSize
+                    'url': thz.uploadDomain + 'mkblk/' + leftSize
                 });
             }
             localStorage.setItem(file.name, JSON.stringify({
