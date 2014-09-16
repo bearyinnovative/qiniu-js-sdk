@@ -324,6 +324,11 @@ function QiniuJsSDK() {
         });
         uploader.init();
 
+        // getUpToken every 30 minutes
+        window.setInterval(function() {
+          getUpToken();
+        }, 30*60000);
+
         uploader.bind('FilesAdded', function(up, files) {
             var auto_start = up.getOption && up.getOption('auto_start');
             auto_start = auto_start || (up.settings && up.settings.auto_start);
