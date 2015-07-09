@@ -294,12 +294,18 @@ function QiniuJsSDK() {
                     if (ajax.readyState === 4 && ajax.status === 200) {
                         var res = that.parseJSON(ajax.responseText);
                         uploader.token = res.result.uptoken;
+                        uploader.tokenTs = Date.now();
                     }
                 };
                 ajax.send();
             } else {
                 uploader.token = op.uptoken;
+                uploader.tokenTs = Date.now();
             }
+        };
+
+        var isTokenExpired = function() {
+            return Date.now() >= uploader.tokenTs + 30 * 60 * 1000;
         };
 
         var getFileKey = function(up, file, func) {
@@ -325,12 +331,10 @@ function QiniuJsSDK() {
         });
         uploader.init();
 
-        // getUpToken every 30 minutes
-        window.setInterval(function() {
-          getUpToken();
-        }, 30*60000);
-
         uploader.bind('FilesAdded', function(up, files) {
+            if (isTokenExpired()) {
+                getUpToken();
+            };
             var auto_start = up.getOption && up.getOption('auto_start');
             auto_start = auto_start || (up.settings && up.settings.auto_start);
             if (auto_start) {
