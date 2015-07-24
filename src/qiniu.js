@@ -332,7 +332,7 @@ function QiniuJsSDK() {
         };
 
         uploader.bind('Init', function(up, params) {
-            getUpToken();
+            // getUpToken(); not need to load uptoken in init
         });
         uploader.init();
 
