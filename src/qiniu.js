@@ -241,7 +241,6 @@ function QiniuJsSDK() {
         op.init.Error = function() {};
         op.init.FileUploaded = function() {};
 
-        var me = this;
         var reset_chunk_size = function() {
             var ie = that.detectIEVersion();
             var BLOCK_BITS, MAX_CHUNK_SIZE, chunk_size;
@@ -299,8 +298,8 @@ function QiniuJsSDK() {
                 };
                 ajax.onloadend = function() {
                     if (callback) {
-                      callback()
-                    };
+                      callback();
+                    }
                 };
                 ajax.send();
             } else {
@@ -310,7 +309,7 @@ function QiniuJsSDK() {
         };
 
         var isTokenExpired = function() {
-            return uploader.tokenTs === undefined || (Date.now() >= uploader.tokenTs + 30 * 60 * 1000) // uptoken expire after 1 hour ;
+            return uploader.tokenTs === undefined || (Date.now() >= uploader.tokenTs + 30 * 60 * 1000);// uptoken expire after 1 hour ;
         };
 
         var getFileKey = function(up, file, func) {
@@ -425,14 +424,14 @@ function QiniuJsSDK() {
                     }
                 } else {
                     directUpload(up, file, that.key_handler);
-                };
+                }
             };
 
             if (isTokenExpired()) {
                 getUpToken(upload);
             } else {
                 upload();
-            };
+            }
         });
 
         uploader.bind('ChunkUploaded', function(up, file, info) {
