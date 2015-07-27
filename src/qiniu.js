@@ -310,7 +310,7 @@ function QiniuJsSDK() {
         };
 
         var isTokenExpired = function() {
-            return Date.now() >= uploader.tokenTs + 30 * 60 * 1000 // uptoken expire after 1 hour ;
+            return uploader.tokenTs === undefined || (Date.now() >= uploader.tokenTs + 30 * 60 * 1000) // uptoken expire after 1 hour ;
         };
 
         var getFileKey = function(up, file, func) {
