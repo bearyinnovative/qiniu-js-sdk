@@ -362,107 +362,111 @@ function QiniuJsSDK() {
 
         uploader.bind('BeforeUpload', function(up, file) {
             var upload = function() {
-              file.speed = file.speed || 0; // add a key named speed for file obj
-              ctx = '';
+                file.speed = file.speed || 0; // add a key named speed for file obj
+                ctx = '';
 
-              var directUpload = function(up, file, func) {
-                  speedCalInfo.startTime = new Date().getTime();
-                  var multipart_params_obj;
-                  if (op.save_key) {
-                      multipart_params_obj = {
-                          'token': uploader.token
-                      };
-                  } else {
-                      multipart_params_obj = {
-                          'key': getFileKey(up, file, func),
-                          'token': uploader.token
-                      };
-                  }
+                var directUpload = function(up, file, func) {
+                    speedCalInfo.startTime = new Date().getTime();
+                    var multipart_params_obj;
+                    if (op.save_key) {
+                        multipart_params_obj = {
+                            'token': uploader.token
+                        };
+                    } else {
+                        multipart_params_obj = {
+                            'key': getFileKey(up, file, func),
+                            'token': uploader.token
+                        };
+                    }
 
-                  var x_vars = op.x_vars;
-                  if (x_vars !== undefined && typeof x_vars === 'object') {
-                      for (var x_key in x_vars) {
-                          if (x_vars.hasOwnProperty(x_key)) {
-                              if (typeof x_vars[x_key] === 'function') {
-                                  multipart_params_obj['x:' + x_key] = x_vars[x_key](up, file);
-                              } else if (typeof x_vars[x_key] !== 'object') {
-                                  multipart_params_obj['x:' + x_key] = x_vars[x_key];
-                              }
-                          }
-                      }
-                  }
-
-
-                  up.setOption({
-                      'url': qiniuUploadUrl,
-                      'multipart': true,
-                      'chunk_size': undefined,
-                      'multipart_params': multipart_params_obj
-                  });
-              };
+                    var x_vars = op.x_vars;
+                    if (x_vars !== undefined && typeof x_vars === 'object') {
+                        for (var x_key in x_vars) {
+                            if (x_vars.hasOwnProperty(x_key)) {
+                                if (typeof x_vars[x_key] === 'function') {
+                                    multipart_params_obj['x:' + x_key] = x_vars[x_key](up, file);
+                                } else if (typeof x_vars[x_key] !== 'object') {
+                                    multipart_params_obj['x:' + x_key] = x_vars[x_key];
+                                }
+                            }
+                        }
+                    }
 
 
-              var chunk_size = up.getOption && up.getOption('chunk_size');
-              chunk_size = chunk_size || (up.settings && up.settings.chunk_size);
-              if (uploader.runtime === 'html5' && chunk_size) {
-                  if (file.size < chunk_size) {
-                      directUpload(up, file, that.key_handler);
-                  } else {
-                      var localFileInfo = localStorage.getItem(file.name);
-                      var blockSize = chunk_size;
-                      if (localFileInfo) {
-                          localFileInfo = JSON.parse(localFileInfo);
-                          var now = (new Date()).getTime();
-                          var before = localFileInfo.time || 0;
-                          var aDay = 24 * 60 * 60 * 1000; //  milliseconds
-                          if (now - before < aDay) {
-                              if (localFileInfo.percent !== 100) {
-                                  if (file.size === localFileInfo.total) {
-                                      // 通过文件名和文件大小匹配，找到对应的 localstorage 信息，恢复进度
-                                      file.percent = localFileInfo.percent;
-                                      file.loaded = localFileInfo.offset;
-                                      ctx = localFileInfo.ctx;
+                    up.setOption({
+                        'url': qiniuUploadUrl,
+                        'multipart': true,
+                        'chunk_size': undefined,
+                        'multipart_params': multipart_params_obj
+                    });
+                };
 
-                                      //  计算速度时，会用到
-                                      speedCalInfo.isResumeUpload = true;
-                                      speedCalInfo.resumeFilesize = localFileInfo.offset;
-                                      if (localFileInfo.offset + blockSize > file.size) {
-                                          blockSize = file.size - localFileInfo.offset;
-                                      }
-                                  } else {
-                                      localStorage.removeItem(file.name);
-                                  }
 
-                              } else {
-                                  // 进度100%时，删除对应的localStorage，避免 499 bug
-                                  localStorage.removeItem(file.name);
-                              }
-                          } else {
-                              localStorage.removeItem(file.name);
-                          }
-                      }
-                      speedCalInfo.startTime = new Date().getTime();
-                      up.setOption({
-                          'url': qiniuUploadUrl + '/mkblk/' + blockSize,
-                          'multipart': false,
-                          'chunk_size': chunk_size,
-                          'required_features': "chunks",
-                          'headers': {
-                              'Authorization': 'UpToken ' + uploader.token
-                          },
-                          'multipart_params': {}
-                      });
-                  }
-              } else {
-                  directUpload(up, file, that.key_handler);
-              }
-           };
+                var chunk_size = up.getOption && up.getOption('chunk_size');
+                chunk_size = chunk_size || (up.settings && up.settings.chunk_size);
+                if (uploader.runtime === 'html5' && chunk_size) {
+                    if (file.size < chunk_size) {
+                        directUpload(up, file, that.key_handler);
+                    } else {
+                        var localFileInfo = localStorage.getItem(file.name);
+                        var blockSize = chunk_size;
+                        if (localFileInfo) {
+                            localFileInfo = JSON.parse(localFileInfo);
+                            var now = (new Date()).getTime();
+                            var before = localFileInfo.time || 0;
+                            var aDay = 24 * 60 * 60 * 1000; //  milliseconds
+                            if (now - before < aDay) {
+                                if (localFileInfo.percent !== 100) {
+                                    if (file.size === localFileInfo.total) {
+                                        // 通过文件名和文件大小匹配，找到对应的 localstorage 信息，恢复进度
+                                        file.percent = localFileInfo.percent;
+                                        file.loaded = localFileInfo.offset;
+                                        ctx = localFileInfo.ctx;
 
-           if (isTokenExpired()) {
-             getUpToken(upload);
-           } else {
-             upload();
-           }
+                                        //  计算速度时，会用到
+                                        speedCalInfo.isResumeUpload = true;
+                                        speedCalInfo.resumeFilesize = localFileInfo.offset;
+                                        if (localFileInfo.offset + blockSize > file.size) {
+                                            blockSize = file.size - localFileInfo.offset;
+                                        }
+                                    } else {
+                                        localStorage.removeItem(file.name);
+                                    }
+
+                                } else {
+                                    // 进度100%时，删除对应的localStorage，避免 499 bug
+                                    localStorage.removeItem(file.name);
+                                }
+                            } else {
+                                localStorage.removeItem(file.name);
+                            }
+                        }
+                        speedCalInfo.startTime = new Date().getTime();
+                        up.setOption({
+                            'url': qiniuUploadUrl + '/mkblk/' + blockSize,
+                            'multipart': false,
+                            'chunk_size': chunk_size,
+                            'required_features': "chunks",
+                            'headers': {
+                                'Authorization': 'UpToken ' + uploader.token
+                            },
+                            'multipart_params': {}
+                        });
+                    }
+                } else {
+                    directUpload(up, file, that.key_handler);
+                }
+
+                file.status = 2; // 2 is plupload.UPLOADING
+                up.trigger("UploadFile", file);
+            };
+
+            if (isTokenExpired()) {
+                getUpToken(upload);
+            } else {
+                upload();
+            }
+            return false;
         });
 
         uploader.bind('UploadProgress', function(up, file) {
