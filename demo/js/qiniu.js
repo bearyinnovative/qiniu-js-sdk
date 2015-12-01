@@ -339,6 +339,9 @@ function QiniuJsSDK() {
             }
         });
 
+        var beforeUploadCallBack = option.init.BeforeUpload;
+        delete(option.init.BeforeUpload); // Do not init BeforeUpload callback, call it manually later.
+
         var uploader = new plupload.Uploader(option);
 
         uploader.uptoken_url = op.uptoken_url;
@@ -361,6 +364,7 @@ function QiniuJsSDK() {
         });
 
         uploader.bind('BeforeUpload', function(up, file) {
+            if (beforeUploadCallBack) {beforeUploadCallBack(up, file);}
             var upload = function() {
                 file.speed = file.speed || 0; // add a key named speed for file obj
                 ctx = '';
