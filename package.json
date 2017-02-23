@@ -1,5 +1,5 @@
 {
-    "name": "qiniu-js-sdk",
+    "name": "@beary/qiniu-js-sdk",
     "version": "1.0.7-beta",
     "private": false,
     "scripts": {
