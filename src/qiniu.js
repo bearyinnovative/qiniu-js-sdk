@@ -231,6 +231,8 @@ function QiniuJsSDK() {
     var that = this;
 
     this.uploader = function(op) {
+        qiniuUploadUrl = op.uploadUrl || qiniuUploadUrl;
+        
         if (!op.domain) {
             throw 'uptoken_url or domain is required!';
         }
